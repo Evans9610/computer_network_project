@@ -39,7 +39,9 @@ TODO
 ----
 
 - VLAN configuration
+  * https://github.com/mininet/mininet/blob/master/examples/vlanhost.py
 - SPF route configuration
+  * https://github.com/wangdongxuking61/ryu/tree/master/shortest_path_app
 - controller behavior implement
 
 References
