@@ -33,6 +33,7 @@ class LearningSwitch (object):
         """
         Handle packet in messages from the switch to implement above algorithm.
         """
+
         packet = event.parsed
         def flood (message = None):
             """ Floods the packet """
@@ -80,13 +81,16 @@ class LearningSwitch (object):
 
         self.macToPort[packet.src] = event.port # 1
         now = int(time.time())
-        if packet.src.to_str() in block_list:
+        # prevent to block switch traffic from port 1
+        if packet.src.to_str() in block_list and event.port != 1:
             if now - block_list[packet.src.to_str()]['timestamp'] > 30:
                 # timeout, release the block_list
                 block_list.pop(packet.src.to_str())
                 log.info("rule blocking {} expired, removed from block_list".format(packet.src.to_str()))
             else:
                 print("{} has been blocked".format(packet.src))
+                # if attack continued then refresh the block rule
+                block_list[packet.src.to_str()]['timestamp'] = int(time.time())
                 drop()
                 return
                 # drop((5, 10))       # idle_timeout, hard_timeout
@@ -159,6 +163,8 @@ def launch (transparent=False, hold_down=_flood_delay):
 
         traffics = {}       # mac: [src_ip, src_port, byte_count, packet_count]
         for f in event.stats:
+            if f.match.nw_src is None:      # ignore switch traffic
+                continue
             src_ip = f.match.nw_src.toStr()
             src_mac = f.match.dl_src.to_str()
             src_port = f.match.in_port      # from switch
