@@ -3,6 +3,7 @@ from mininet.topo import Topo
 from mininet.util import quietRun
 from mininet.log import error
 from mininet.node import RemoteController
+
 class VLANHost( Host ):
     "Host connected to VLAN interface"
 
@@ -13,67 +14,62 @@ class VLANHost( Host ):
         r = super( VLANHost, self ).config( **params )
 
         intf = self.defaultIntf()
-        # remove IP from default, "physical" interface
         self.cmd( 'ifconfig %s inet 0' % intf )
-        # create VLAN interface
         self.cmd( 'vconfig add %s %d' % ( intf, vlan ) )
-        # assign the host's IP to the VLAN interface
         self.cmd( 'ifconfig %s.%d inet %s' % ( intf, vlan, params['ip'] ) )
-        # update the intf name and host's intf map
         newName = '%s.%d' % ( intf, vlan )
-        # update the (Mininet) interface to refer to VLAN interface name
         intf.name = newName
-        # add VLAN interface to host's name to intf map
         self.nameToIntf[ newName ] = intf
 
         return r
 
 hosts = { 'vlan': VLANHost }
-controller = None
-
-def exampleAllHosts( vlan ):
-    """Simple example of how VLANHost can be used in a script"""
-    # This is where the magic happens...
-    host = partial( VLANHost, vlan=vlan )
-    # vlan (type: int): VLAN ID to be used by all hosts
-
-    # Start a basic network using our VLANHost
-    topo = SingleSwitchTopo( k=2 )
-    net = Mininet( host=host, topo=topo )
-    net.start()
-    CLI( net )
-    net.stop()
-
-# pylint: disable=arguments-differ
 
 class VLANStarTopo( Topo ):
-    """Example topology that uses host in multiple VLANs
-       The topology has a single switch. There are k VLANs with
-       n hosts in each, all connected to the single switch. There
-       are also n hosts that are not in any VLAN, also connected to
-       the switch."""
-
     def build( self, k=2, n=2, vlanBase=100 ):
         s1 = self.addSwitch( 's1' )
-        for i in range( k ):
-            vlan = vlanBase + i
-            for j in range(n):
-                name = 'h%d_%d' % ( j+1, vlan )
-                h = self.addHost( name, cls=VLANHost, vlan=vlan )
-                self.addLink( h, s1 )
-        for j in range( n ):
-            h = self.addHost( 'h%d' % (j+1) )
-            self.addLink( h, s1 )
+        s2 = self.addSwitch( 's2' )
+        s3 = self.addSwitch( 's3' )
+        s4 = self.addSwitch( 's4' )
+        s5 = self.addSwitch( 's5' )
+        self.addLink( s1, s2 )
+        self.addLink( s1, s3 )
+        self.addLink( s2, s5 )
+        self.addLink( s2, s4 )
+        self.addLink( s2, s3 )
+        self.addLink( s3, s4 )
+        self.addLink( s4, s5 )
+
+        vlan_list = [100, 200, 100, 200, 100, 200, 100, 200]
+        h1 = self.addHost( 'h1', cls=VLANHost, vlan=vlan_list[0])
+        self.addLink( h1, s3 )
+        h2 = self.addHost( 'h2', cls=VLANHost, vlan=vlan_list[1])
+        self.addLink( h2, s3 )
+        h3 = self.addHost( 'h3', cls=VLANHost, vlan=vlan_list[2])
+        self.addLink( h3, s4 )
+        h4 = self.addHost( 'h4', cls=VLANHost, vlan=vlan_list[3])
+        self.addLink( h4, s1 )
+        h5 = self.addHost( 'h5', cls=VLANHost, vlan=vlan_list[4])
+        self.addLink( h5, s5 )
+        h6 = self.addHost( 'h6', cls=VLANHost, vlan=vlan_list[5])
+        self.addLink( h6, s2 )
+        h7 = self.addHost( 'h7', cls=VLANHost, vlan=vlan_list[6])
+        self.addLink( h7, s2 )
+        h8 = self.addHost( 'h8', cls=VLANHost, vlan=vlan_list[7])
+        self.addLink( h8, s5 )
+
 
 def exampleCustomTags():
-    """Simple example that exercises VLANStarTopo"""
 
     net = Mininet( topo=VLANStarTopo() )
-
     c1 = net.addController(name="c1", controller=RemoteController, ip="127.0.0.1", port=8787)
     net.start()
     c1.start()
     net.get('s1').start([c1])
+    net.get('s2').start([c1])
+    net.get('s4').start([c1])
+    net.get('s5').start([c1])
+    net.get('s3').start([c1])
     CLI( net )
     net.stop()
 
@@ -85,6 +81,7 @@ if __name__ == '__main__':
     from mininet.cli import CLI
     from mininet.topo import SingleSwitchTopo
     from mininet.log import setLogLevel
+
     setLogLevel( 'info' )
 
     if not quietRun( 'which vconfig' ):
