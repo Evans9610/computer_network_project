@@ -1,27 +1,23 @@
 from mininet.net import Mininet
-
 from mininet.node import Controller, RemoteController, OVSKernelSwitch, UserSwitch
-
 from mininet.cli import CLI
-
 from mininet.log import setLogLevel
-
 from mininet.link import Link, TCLink
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> e2ce21e37fc59bad099b089fb52b9d0df51e3081
 def topology():
-
     net = Mininet( controller=RemoteController, link=TCLink, switch=OVSKernelSwitch )
 
-
-
     # Add hosts and switches
-
     h1 = net.addHost( 'h1', ip="10.0.1.10/24", mac="00:00:00:00:00:01" )
     h2 = net.addHost( 'h2', ip="10.0.2.10/24", mac="00:00:00:00:00:02" )
     h3 = net.addHost( 'h3', ip="10.0.1.20/24", mac="00:00:00:00:00:03" )
     h4 = net.addHost( 'h4', ip="10.0.2.20/24", mac="00:00:00:00:00:04" )
+<<<<<<< HEAD
     h5 = net.addHost( 'h5', ip="10.1.1.10/24", mac="00:00:00:00:00:05" )
     r1 = net.addHost( 'r1')
     r2 = net.addHost( 'r2')
@@ -31,27 +27,41 @@ def topology():
     c0 = net.addController( 'c0', controller=RemoteController, ip='127.0.0.1', port=6633 )
 
 
+=======
+    r1 = net.addHost( 'r1')
+    s1 = net.addSwitch( 's1')
+    s2 = net.addSwitch( 's2')
+    c0 = net.addController( 'c0', controller=RemoteController, ip='127.0.0.1', port=6633 )
+>>>>>>> e2ce21e37fc59bad099b089fb52b9d0df51e3081
     net.addLink( r1, s1 )
     net.addLink( r1, s2 )
     net.addLink( h1, s1 )
     net.addLink( h3, s1 )
     net.addLink( h2, s2 )
     net.addLink( h4, s2 )
+<<<<<<< HEAD
 
     net.addLink( h5, s3 )
     net.addLink( s3, r1 )
     net.addLink( r1, r2 )
 
+=======
+>>>>>>> e2ce21e37fc59bad099b089fb52b9d0df51e3081
     net.build()
     c0.start()
     s1.start( [c0] )
     s2.start( [c0] )
     r1.cmd("ifconfig r1-eth0 0")
     r1.cmd("ifconfig r1-eth1 0")
+<<<<<<< HEAD
+=======
+    r1.cmd("ifconfig r1-eth0 hw ether 00:00:00:00:01:01")
+>>>>>>> e2ce21e37fc59bad099b089fb52b9d0df51e3081
     r1.cmd("ifconfig r1-eth1 hw ether 00:00:00:00:01:02")
     r1.cmd("ip addr add 10.0.1.1/24 brd + dev r1-eth0")
     r1.cmd("ip addr add 10.0.2.1/24 brd + dev r1-eth1")
     r1.cmd("echo 1 > /proc/sys/net/ipv4/ip_forward")
+<<<<<<< HEAD
     r2.cmd("ifconfig r2-eth0 0")
     r2.cmd("ifconfig r2-eth0 hw ether 00:00:00:00:01:05")
     r2.cmd("sysctl net.ipv4.ip_forward=1")
@@ -60,12 +70,25 @@ def topology():
     s3.cmd("ovs-ofctl add-flow s3 priority=65535,ip,dl_dst=00:00:00:00:01:05,actions=output:1")
     s3.cmd("ovs-ofctl add-flow s3 priority=10,ip,nw_dst=10.1.1.10,actions=output:2")
 
+=======
+>>>>>>> e2ce21e37fc59bad099b089fb52b9d0df51e3081
     h1.cmd("ip route add default via 10.0.1.1")
     h2.cmd("ip route add default via 10.0.2.1")
     h3.cmd("ip route add default via 10.0.1.1")
     h4.cmd("ip route add default via 10.0.2.1")
+<<<<<<< HEAD
     h5.cmd("ip route add default via 10.1.1.1")
 
+=======
+    s1.cmd("ovs-ofctl add-flow s1 priority=1,arp,actions=flood")
+    s1.cmd("ovs-ofctl add-flow s1 priority=65535,ip,dl_dst=00:00:00:00:01:01,actions=output:1")
+    s1.cmd("ovs-ofctl add-flow s1 priority=10,ip,nw_dst=10.0.1.10,actions=output:2")
+    s1.cmd("ovs-ofctl add-flow s1 priority=10,ip,nw_dst=10.0.1.20,actions=output:3")
+    s2.cmd("ovs-ofctl add-flow s2 priority=1,arp,actions=flood")
+    s2.cmd("ovs-ofctl add-flow s2 priority=65535,ip,dl_dst=00:00:00:00:01:02,actions=output:1")
+    s2.cmd("ovs-ofctl add-flow s2 priority=10,ip,nw_dst=10.0.2.10,actions=output:2")
+    s2.cmd("ovs-ofctl add-flow s2 priority=10,ip,nw_dst=10.0.2.20,actions=output:3")
+>>>>>>> e2ce21e37fc59bad099b089fb52b9d0df51e3081
     print "*** Running CLI"
     CLI( net )
 
