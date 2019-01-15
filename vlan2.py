@@ -30,8 +30,8 @@ class VLANStarTopo( Topo ):
         s1 = self.addSwitch( 's1', mac="ff:00:00:00:00:01" )
         s2 = self.addSwitch( 's2', mac="ff:00:00:00:00:02" )
         s3 = self.addSwitch( 's3', mac="ff:00:00:00:00:03" )
-        h1 = self.addHost( 'h1-100', cls=VLANHost, vlan=vlan )
-        h2 = self.addHost( 'h2-100', cls=VLANHost, vlan=vlan )
+        h1 = self.addHost( 'h1', cls=VLANHost, vlan=100, mac="dd:00:00:00:00:01")
+        h2 = self.addHost( 'h2', cls=VLANHost, vlan=100, mac="dd:00:00:00:00:01")
         self.addLink( h1, s1 )
         self.addLink( h2, s2 )
         self.addLink( s1, s2 )
@@ -42,7 +42,7 @@ class VLANStarTopo( Topo ):
 def exampleCustomTags():
 
     net = Mininet( topo=VLANStarTopo() )
-    c1 = net.addController(name="c1", controller=RemoteController, ip="127.0.0.1", port=6633)
+    c1 = net.addController(name="c1", controller=RemoteController, ip="127.0.0.1", port=8787)
     net.start()
     c1.start()
     net.get('s1').start([c1])

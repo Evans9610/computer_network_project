@@ -2,7 +2,7 @@ from mininet.node import Host
 from mininet.topo import Topo
 from mininet.util import quietRun
 from mininet.log import error
-
+from mininet.node import RemoteController
 class VLANHost( Host ):
     "Host connected to VLAN interface"
 
@@ -29,7 +29,7 @@ class VLANHost( Host ):
         return r
 
 hosts = { 'vlan': VLANHost }
-
+controller = None
 
 def exampleAllHosts( vlan ):
     """Simple example of how VLANHost can be used in a script"""
@@ -65,12 +65,15 @@ class VLANStarTopo( Topo ):
             h = self.addHost( 'h%d' % (j+1) )
             self.addLink( h, s1 )
 
-
 def exampleCustomTags():
     """Simple example that exercises VLANStarTopo"""
 
     net = Mininet( topo=VLANStarTopo() )
+
+    c1 = net.addController(name="c1", controller=RemoteController, ip="127.0.0.1", port=8787)
     net.start()
+    c1.start()
+    net.get('s1').start([c1])
     CLI( net )
     net.stop()
 
@@ -82,7 +85,6 @@ if __name__ == '__main__':
     from mininet.cli import CLI
     from mininet.topo import SingleSwitchTopo
     from mininet.log import setLogLevel
-
     setLogLevel( 'info' )
 
     if not quietRun( 'which vconfig' ):
